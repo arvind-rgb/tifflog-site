@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ZA463RJV28.ai.tifflog.app"],
+        "components": [{ "/": "/t/*", "comment": "two-way tiff invites" }]
+      }
+    ]
+  }
+}

@@ -34,6 +34,35 @@
       </div>
     </div>
 
+
+    <div class="win" id="tiff" hidden>
+      <div class="bar"><i></i><i></i><i></i> your_side.exe</div>
+      <div class="body">
+        <p class="display" id="tiffTitle" style="font-size:26px"></p>
+        <p class="mono small soft" id="tiffSub">Open it in Tiff Log to give your side. Private and encrypted: only you two can read it.</p>
+        <a class="btn" id="openApp" href="#">OPEN IN TIFF LOG →</a>
+        <a class="btn secondary" id="getIos" href="https://apps.apple.com/app/id6820374810">GET IT ON THE APP STORE</a>
+        <a class="btn secondary" id="getAndroid" href="#">GET IT ON GOOGLE PLAY</a>
+        <p class="mono small soft" id="tiffHint">New to Tiff Log? Install it, sign up, and the tiff is waiting for you. On iPhone, tap <b>🔗 paste it</b> on the first screen (we copy the invite for you).</p>
+      </div>
+    </div>
+
+    <div class="win" id="friend" hidden>
+      <div class="bar"><i></i><i></i><i></i> real_friend.exe</div>
+      <div class="body" id="friendBody">
+        <p class="mono small soft" id="askFrom"></p>
+        <p class="display" id="askTitle" style="font-size:26px"></p>
+        <p class="mono small soft" id="askTopic"></p>
+        <p id="askSummary" style="font: 17px/1.5 'Fraunces', Georgia, serif"></p>
+        <label class="mono small" for="take"><b>your take</b> (be kind, be real)</label>
+        <textarea id="take" maxlength="500" rows="4" placeholder="ok here's what I'd do…" style="font: 16px/1.4 system-ui, sans-serif; padding:12px; border:2px solid var(--ink); border-radius:10px; background:var(--paper)"></textarea>
+        <div id="emojis" style="display:flex; gap:8px; flex-wrap:wrap"></div>
+        <label class="mono small" for="fname">your name, or skip</label>
+        <input id="fname" maxlength="30" placeholder="a friend" style="font: 16px system-ui, sans-serif; padding:10px 12px; border:2px solid var(--ink); border-radius:10px; background:var(--paper)" />
+        <button class="btn" id="sendTake" type="button">SEND MY TAKE →</button>
+        <p class="mono small soft">Encrypted in this browser before it's sent. Only your friend can read it. No account, no app needed.</p>
+      </div>
+    </div>
     <div class="cta">
       <a class="btn" href="/">WHAT'S TIFF LOG? →</a>
     </div>
@@ -54,6 +83,124 @@
           navigator.clipboard.writeText(code).then(function () { btn.textContent = 'COPIED ✓'; });
         } catch (e) {}
       });
+    })();
+  </script>
+
+  <script>
+    // Two-way tiff invites (/t/CODE#KEY) and "ask a real friend" (/f/CODE#KEY).
+    // The #KEY never reaches any server: this page opens and seals everything with it, in the browser.
+    (function () {
+      var SUPA = 'https://vkanobhzeoyndbhlhqvw.supabase.co';
+      var KEY = 'sb_publishable_ZYN_OaMnAXM2wInAU6bO3Q_ILETE6ay';
+      var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      var t = location.pathname.match(/^\/t\/([A-Za-z0-9]{8})\/?$/);
+      var f = location.pathname.match(/^\/f\/([A-Za-z0-9]{10})\/?$/);
+      var frag = location.hash.slice(1);
+      if (!(t || f) || !frag) return;
+      var $ = function (id) { return document.getElementById(id); };
+      var enc = new TextEncoder(), dec = new TextDecoder();
+
+      function b32(s) {
+        var out = [], bits = 0, val = 0;
+        s = s.toUpperCase();
+        for (var i = 0; i < s.length; i++) {
+          var v = ALPHA.indexOf(s[i]); if (v < 0) throw new Error('bad');
+          val = (val << 5) | v; bits += 5;
+          if (bits >= 8 && out.length < 16) { out.push((val >>> (bits - 8)) & 255); bits -= 8; }
+        }
+        return new Uint8Array(out);
+      }
+      function b64(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+      function tob64(b) { var s = ''; b.forEach(function (x) { s += String.fromCharCode(x); }); return btoa(s); }
+      function key(raw, info) {
+        return crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveKey']).then(function (k) {
+          return crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: enc.encode(info) }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+        });
+      }
+      function open(k, sealed) {
+        var body = b64(sealed.split('.')[1]);
+        return crypto.subtle.decrypt({ name: 'AES-GCM', iv: body.slice(0, 12) }, k, body.slice(12)).then(function (p) { return JSON.parse(dec.decode(p)); });
+      }
+      function seal(k, obj) {
+        var iv = crypto.getRandomValues(new Uint8Array(12));
+        return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k, enc.encode(JSON.stringify(obj))).then(function (ct) {
+          var j = new Uint8Array(12 + ct.byteLength); j.set(iv, 0); j.set(new Uint8Array(ct), 12); return 'v1.' + tob64(j);
+        });
+      }
+      function call(body) {
+        return fetch(SUPA + '/functions/v1/share', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json(); });
+      }
+      function gone(msg) {
+        $('title').textContent = 'This link expired. 🫠';
+        $('lede').textContent = msg;
+      }
+
+      if (t) {
+        var code = t[1].toUpperCase(), invite = 'TIFF-' + code + '-' + frag.toUpperCase();
+        document.title = 'Your side? · Tiff Log';
+        $('title').textContent = 'Your side? 👀';
+        $('lede').textContent = 'Someone wants your side of a tiff.';
+        $('tiff').hidden = false;
+        $('openApp').href = 'tifflog://join?code=' + invite;
+        $('getAndroid').href = 'https://play.google.com/store/apps/details?id=ai.tifflog.app&referrer=' + encodeURIComponent(invite);
+        var ua = navigator.userAgent;
+        if (/android/i.test(ua)) $('getIos').hidden = true;
+        else if (/iphone|ipad|ipod/i.test(ua)) $('getAndroid').hidden = true;
+        // iPhone has no install referrer: copy the invite so the app can pick it up after install.
+        $('getIos').addEventListener('click', function () { try { navigator.clipboard.writeText(location.href); } catch (e) {} });
+        key(b32(frag), 'tifflog-link-v1').then(function (k) {
+          return call({ action: 'peek', code: code }).then(function (res) {
+            if (!res.events) return gone('Invites last 14 days. Ask them to send a fresh one.');
+            return Promise.all(res.events.map(function (e) { return open(k, e.payload).then(function (d) { return { kind: e.kind, d: d }; }, function () { return null; }); }));
+          }).then(function (evs) {
+            if (!evs) return;
+            var hello = evs.filter(function (e) { return e && e.kind === 'hello'; })[0];
+            var tiffs = evs.filter(function (e) { return e && e.kind === 'tiff'; });
+            var who = hello ? hello.d.nickname : 'Someone';
+            var last = tiffs[tiffs.length - 1];
+            $('lede').textContent = last ? who + ' wants your side of a tiff.' : who + ' wants to link up on Tiff Log.';
+            if (last) $('tiffTitle').textContent = '“' + last.d.title + '”';
+          });
+        }).catch(function () {});
+      }
+
+      if (f) {
+        var fcode = f[1].toUpperCase(), emoji = '🫶';
+        document.title = 'A friend needs your take · Tiff Log';
+        $('title').textContent = 'Real friend needed. 🫖';
+        $('lede').textContent = 'Someone wants your honest take on a lil fight.';
+        ['🫶', '😂', '🙃', '👀', '🙏', '🍿', '🫠', '💅'].forEach(function (e) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.textContent = e; b.className = 'btn secondary';
+          b.style.cssText = 'padding:6px 10px; font-size:20px; box-shadow:none';
+          b.onclick = function () { emoji = e; Array.prototype.forEach.call($('emojis').children, function (c) { c.style.background = ''; }); b.style.background = 'var(--butter)'; };
+          $('emojis').appendChild(b);
+        });
+        key(b64(frag), 'tifflog-friend-v1').then(function (k) {
+          return call({ action: 'friend_get', code: fcode }).then(function (res) {
+            if (!res.payload) return gone('Asks last 14 days. Tell your friend to send a new one.');
+            return open(k, res.payload).then(function (a) {
+              $('friend').hidden = false;
+              $('askFrom').textContent = a.from + ' · a tiff with their ' + a.who;
+              $('askTitle').textContent = '“' + a.title + '”';
+              $('askTopic').textContent = 'what set it off: ' + a.topic;
+              $('askSummary').textContent = a.summary;
+              $('sendTake').onclick = function () {
+                var take = $('take').value.trim();
+                if (take.length < 2) { $('take').focus(); return; }
+                $('sendTake').disabled = true; $('sendTake').textContent = 'SENDING…';
+                seal(k, { name: $('fname').value.trim() || 'a friend', emoji: emoji, take: take }).then(function (payload) {
+                  return call({ action: 'friend_reply', code: fcode, payload: payload });
+                }).then(function (r) {
+                  if (!r.ok) throw new Error(r.error);
+                  $('friendBody').innerHTML = '<p class="display" style="font-size:26px">Sent. You\'re a real one. 🫶</p><p class="mono small soft">' + a.from + ' will see your take. Got your own tiffs? Tiff Log helps you fight less and make up faster.</p><a class="btn" href="/">GET TIFF LOG →</a>';
+                }).catch(function () { $('sendTake').disabled = false; $('sendTake').textContent = 'TRY AGAIN →'; });
+              };
+            });
+          });
+        }).catch(function () { gone('This link looks broken. Ask your friend to send it again.'); });
+      }
     })();
   </script>
 </body>

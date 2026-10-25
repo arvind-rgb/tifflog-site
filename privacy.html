@@ -35,7 +35,14 @@
     <p>AI usage counts per day (number of requests and cost), so the app stays free and fair.</p>
     <p>App usage events, so we can see what helps and what breaks: which features you use and when (for example &quot;logged a tiff&quot;, &quot;opened Ask Squad&quot;, &quot;made up&quot;), how long an AI answer took, the app version and a random ID for this install. Never your words. They are deleted with your account.</p>
     <p>Invite codes: your code and how many friends joined with it. Friends never see what you write.</p>
+    <p>If you share a tiff or ask a friend: the shared parts (see below), sealed so we can't read them, and which accounts are linked to each other. A push-notification token for your phone, if you allow notifications.</p>
     <p>Offline mode keeps everything on your phone only.</p>
+
+    <h2>Sharing a tiff and asking a friend</h2>
+    <p>Get their side: you choose to send the other person the tiff's name, the topic, a summary you write, and (if you pick it) how you felt. They can send back how they felt, their side, what would help, and when they tap &quot;we made up&quot;. Your rant, your part, your notes, the AI's answers and the squad's takes are never shared.</p>
+    <p>Ask a real friend: you choose to send a friend the tiff's name, the topic and a summary you write. They can reply on tifflog.ai without an account; their reply is shown only to you.</p>
+    <p>Both are encrypted on the sender's device with a key that travels only inside the link, so our server stores text it can't read. Anyone who has the link can open it, so only send it to the person it's for. Invite links stop working after 14 days.</p>
+    <p>Notifications about these are generic (&quot;they gave their side&quot;), because our server never knows names or what was shared. You can unlink a person or delete a shared tiff any time.</p>
 
     <h2>Learning, on your phone</h2>
     <p>Tiff Log learns what works for you (how you make up, which advice you 👍, which rules hold) by looking at your own tiffs on your phone. That learning stays in your encrypted data.</p>
@@ -50,7 +57,7 @@
     <p>Supabase (database and sign-in), hosted in Mumbai, India.</p>
     <p>Resend, to email your sign-in codes.</p>
     <p>Anthropic, for some AI answers, as described above.</p>
-    <p>Apple (App Store) and Google (Google Play) distribute the app; their own privacy policies cover what they collect when you download or update it. On the App Store it is listed under our founder's name, Arvindakshan Ravichandran, on behalf of Bhookle Tech Private Limited. Reminders (nudges) are scheduled on your phone; we don't run a push-notification server.</p>
+    <p>Apple (App Store) and Google (Google Play) distribute the app; their own privacy policies cover what they collect when you download or update it. On the App Store it is listed under our founder's name, Arvindakshan Ravichandran, on behalf of Bhookle Tech Private Limited. Reminders (nudges) are scheduled on your phone. Two-way notifications are sent through Expo's push service and Apple/Google, with generic text only.</p>
 
     <h2>How long we keep it</h2>
     <p>As long as your account exists. When you delete everything, your account, tiffs, people, invite data and key backup are removed from our database right away, and from backups within 30 days.</p>

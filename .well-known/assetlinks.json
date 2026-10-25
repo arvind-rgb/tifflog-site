@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ai.tifflog.app",
+      "sha256_cert_fingerprints": ["6B:5C:44:6E:51:3B:3F:00:49:50:AE:75:3D:AC:F1:6F:F7:E3:84:CF:E1:F3:0E:2B:0D:DD:10:CC:D1:0C:DC:B1"]
+    }
+  }
+]
