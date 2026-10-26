@@ -70,6 +70,8 @@ a { color: inherit; }
 .body { padding: 16px; display: grid; gap: 12px; }
 .body p { margin: 0; }
 .verbs { display: grid; gap: 10px; margin-top: 6px; }
+.film .body { justify-items: center; text-align: center; }
+.film video { width: 100%; max-width: 340px; aspect-ratio: 9 / 16; border: 2px solid var(--ink); border-radius: 10px; background: var(--ink); display: block; }
 
 /* grid of moments */
 .moments { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 28px 0; }

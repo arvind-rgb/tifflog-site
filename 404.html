@@ -134,6 +134,8 @@
       function gone(msg) {
         $('title').textContent = 'This link expired. 🫠';
         $('lede').textContent = msg;
+        $('tiff').hidden = true;
+        $('friend').hidden = true;
       }
 
       if (t) {
