@@ -91,3 +91,9 @@ footer { border-top: 2px solid var(--ink); margin-top: 40px; padding-top: 16px; 
 .legal details { border: 2px solid var(--ink); border-radius: 12px; background: #fffbf4; padding: 10px 14px; margin: 8px 0; }
 .legal summary { font: 700 14px 'Space Mono', monospace; cursor: pointer; }
 .legal details p { margin: 8px 0 2px; }
+
+.stores { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.stores .btn { text-decoration: none; }
+.qr-desk { display: none; justify-items: center; gap: 4px; margin-top: 6px; }
+.qr-desk img { border: 2px solid var(--ink); border-radius: 8px; image-rendering: pixelated; }
+@media (hover: hover) and (pointer: fine) and (min-width: 820px) { .qr-desk { display: grid; } }
